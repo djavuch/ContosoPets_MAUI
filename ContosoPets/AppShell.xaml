@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="ContosoPets.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:pets="clr-namespace:ContosoPets.View.PetsView"
+    xmlns:owners="clr-namespace:ContosoPets.View.PetsOwnersView"
+    Shell.FlyoutBehavior="Flyout"
+    Title="ContosoPets">
+
+    <ShellContent
+        Title="Pets"
+        ContentTemplate="{DataTemplate pets:PetsPage}"
+        Route="PetsPage" />
+    <ShellContent
+        Title="Owners"
+        ContentTemplate="{DataTemplate owners:PetsOwnersPage}"
+        Route="PetsOwnersPage" />
+
+</Shell>

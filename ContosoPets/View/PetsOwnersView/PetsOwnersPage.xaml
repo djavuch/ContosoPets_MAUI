@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:ContosoPets.ViewModels.PetsOwnersViewModels"
+             xmlns:model="clr-namespace:ContosoPets.Models"
+             x:Class="ContosoPets.View.PetsOwnersView.PetsOwnersPage">
+
+    <StackLayout Padding="20">
+        <Grid ColumnDefinitions="*,*,*,*,*,*,*,*,*,*"
+            RowDefinitions="Auto"
+            BackgroundColor="#e7d5d5"
+            Padding="10">
+            <Label Grid.Column="0" Text="No." FontAttributes="Bold,Italic" />
+            <Label Grid.Column="1" Text="Name" FontAttributes="Bold,Italic" />
+            <Label Grid.Column="2" Text="Email" FontAttributes="Bold,Italic" />
+            <Label Grid.Column="3" Text="Phone" FontAttributes="Bold,Italic" />
+            <Label Grid.Column="4" Text="Zip code" FontAttributes="Bold,Italic" />
+            <Label Grid.Column="5" Text="State" FontAttributes="Bold,Italic" />
+            <Label Grid.Column="6" Text="City" FontAttributes="Bold,Italic" />
+            <Label Grid.Column="7" Text="Address" FontAttributes="Bold,Italic" />
+            <Label Grid.Column="8" Text="Pet" FontAttributes="Bold,Italic" />
+            <Label Grid.Column="9" Text="Actions" FontAttributes="Bold,Italic" />
+        </Grid>
+
+        <CollectionView ItemsSource="{Binding PetsOwners}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate >
+                    <Border Stroke="#c7d9d5" StrokeThickness="1" Margin="0,0,0,15">
+                        <Grid ColumnDefinitions="*,*,*,*,*,*,*,*,*,*"
+                              Padding="10">
+                            <Label Grid.Column="0" Text="{Binding DisplayIndexOwner}" VerticalOptions="Center" />
+
+                            <Label 
+                                Grid.Column="1" VerticalOptions="Center" >
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PetsOwnersViewModel}}, Path=OpenDetailsCommand}"
+                                                          CommandParameter="{Binding}"/>
+                                </Label.GestureRecognizers>
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="{Binding OwnerName}" 
+                                              TextColor="black"
+                                              FontAttributes="Bold" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+
+                            <Label Grid.Column="2" Text="{Binding OwnerEmail}" VerticalOptions="Center" />
+                            <Label Grid.Column="3" Text="{Binding OwnerPhone}" VerticalOptions="Center" />
+                            <Label Grid.Column="4" Text="{Binding OwnerZipCode}" VerticalOptions="Center" />
+                            <Label Grid.Column="5" Text="{Binding OwnerState}" VerticalOptions="Center" />
+                            <Label Grid.Column="6" Text="{Binding OwnerCity}" VerticalOptions="Center" />
+                            <Label Grid.Column="7" Text="{Binding OwnerAddress}" VerticalOptions="Center" />
+
+                            <CollectionView Grid.Column="8"
+                                            ItemsSource="{Binding Pets}"
+                                            VerticalOptions="Center">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate >
+                                        <Label Text="{Binding PetName}" VerticalOptions="Center" />
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+
+                            <CheckBox Grid.Column="9" IsChecked="{Binding SelectedOwnerToRemove}"/>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+
+
+        <StackLayout Orientation="Horizontal" 
+                     Spacing="10" 
+                     Margin="20,10,20,0"
+                     HorizontalOptions="Center">
+            <Button Text="➕ Add Owner"
+                    Command="{Binding OpenAddPetOwnerPopupCommand}"
+                    WidthRequest="-1"
+                    HeightRequest="50"
+                    BackgroundColor="#10B981"
+                    TextColor="White"
+                    CornerRadius="10"
+                    FontSize="14"
+                    FontAttributes="Bold" />
+            <Button Text="🗑️ Delete selected owners"
+                    Command="{Binding DeleteSelectedOwnersCommand}"
+                    WidthRequest="-1"
+                    HeightRequest="50"
+                    BackgroundColor="#EF4444"
+                    TextColor="White"
+                    CornerRadius="10"
+                    FontSize="14"
+                    FontAttributes="Bold" />
+        </StackLayout>
+    </StackLayout>
+</ContentPage>

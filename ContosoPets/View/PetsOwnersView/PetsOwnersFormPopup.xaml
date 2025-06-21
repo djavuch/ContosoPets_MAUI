@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    x:Class="ContosoPets.PetsOwnersFormPopup"
+    xmlns:model="clr-namespace:ContosoPets.Models"
+    xmlns:vm="clr-namespace:ContosoPets.ViewModels.PetsOwnersViewModels"
+    x:DataType="vm:PetsOwnersViewModel"
+    CanBeDismissedByTappingOutsideOfPopup="False">
+
+    <ScrollView>
+        <Border WidthRequest="800"
+            HeightRequest="1000"
+            BackgroundColor="#EEEEEE">
+            <VerticalStackLayout Padding="20" Spacing="10">
+
+                <Entry Placeholder="Owner name" Text="{Binding SelectedPetOwner.OwnerName}" />
+                <Entry 
+                    Placeholder="Owner phone" 
+                    Text="{Binding SelectedPetOwner.OwnerPhone}" 
+                    Keyboard="Telephone"
+                    MaxLength="20"
+                    ReturnType="Done"
+                    />
+                <Entry Placeholder="Owner email" Text="{Binding SelectedPetOwner.OwnerEmail}" />
+                <Entry Placeholder="Owner address" Text="{Binding SelectedPetOwner.OwnerAddress}" />
+                <Entry Placeholder="Owner city" Text="{Binding SelectedPetOwner.OwnerCity}" />
+                <Entry Placeholder="Owner state" Text="{Binding SelectedPetOwner.OwnerState}" />
+                <Entry Placeholder="Owner zip code" Text="{Binding SelectedPetOwner.OwnerZipCode}" />
+
+                <Label Text="Owner's pets: " FontAttributes="Bold" Margin="0,10,0,0"/>
+                <CollectionView 
+                    x:Name="PetsCollectionView"  
+                    ItemsSource="{Binding SelectedPetOwner.Pets}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="model:PetsModel">
+                            <HorizontalStackLayout Spacing="8" VerticalOptions="Center" Padding="4,0">
+                                <Label Text="{Binding PetName}" VerticalOptions="Center" />
+                                <Button
+                                    Text="✕"
+                                    FontSize="18"
+                                    BackgroundColor="Transparent"
+                                    TextColor="Red"
+                                    Padding="0"
+                                    Command="{Binding x:DataType='vm:PetsOwnersViewModel', Source={RelativeSource AncestorType={x:Type vm:PetsOwnersViewModel}}, Path=RemovePetFromOwnerCommand }"
+                                    CommandParameter="{Binding}"
+                                    HorizontalOptions="EndAndExpand"
+                                    VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <SearchBar Placeholder="Find pets"
+                                   Text="{Binding PetSearchText, Mode=TwoWay}" />
+
+                <CollectionView ItemsSource="{Binding FilteredPets}"
+                            SelectionMode="Single"
+                            SelectedItem="{Binding SelectedPet, Mode=TwoWay}"
+                            MinimumHeightRequest="100"
+                            SelectionChangedCommand="{Binding x:DataType='vm:PetsOwnersViewModel', Source={RelativeSource AncestorType={x:Type vm:PetsOwnersViewModel}}, Path=AddPetToOwnerCommand}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="model:PetsModel">
+                            <Border Stroke="#E0E0E0" StrokeThickness="1" Padding="8" Margin="0,2" StrokeShape="RoundRectangle 8">
+                                <Label Text="{Binding PetName}" />
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+
+                <Button
+                    Text="Save"
+                    Command="{Binding SavePetOwnerCommand}"/>
+                <Button
+                    Text="Cancel"
+                    Command="{Binding CancelPetOwnerEditCommand}"/>
+            </VerticalStackLayout>
+        </Border>
+    </ScrollView>
+</toolkit:Popup>
+    
+

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    x:Class="ContosoPets.PetFormPopup"
+    xmlns:model="clr-namespace:ContosoPets.Models"
+    xmlns:vm="clr-namespace:ContosoPets.ViewModels.PetsViewModels"
+    x:DataType="vm:PetsViewModel"
+    CanBeDismissedByTappingOutsideOfPopup="False">
+
+    <ScrollView>
+        <Border 
+            WidthRequest="800" 
+            HeightRequest="700"
+            BackgroundColor="#EEEEEE">
+            <VerticalStackLayout Padding="20" Spacing="10">
+                <Entry Placeholder="Pet name" Text="{Binding SelectedPet.PetName}" />
+                <Picker Title="Choose pets specie"
+                        ItemsSource="{Binding SpeciesOptions}"
+                        SelectedItem="{Binding SelectedPet.PetSpecie}"/>
+                <Entry Placeholder="Pet's age" Text="{Binding SelectedPet.PetAge}" />
+                <Entry Placeholder="Pet's physical description" Text="{Binding SelectedPet.PetPhysicalDescription}" />
+                <Entry Placeholder="Pet's personal description" Text="{Binding SelectedPet.PetPersonalDescription}" />
+
+                <Grid ColumnDefinitions="Auto,*">
+                    <Label Text="Owner:" VerticalOptions="Center" Padding="0,0,5,0" />
+                    <Label Text="{Binding SelectedPet.Owner.OwnerName}" Grid.Column="1" />
+                </Grid>
+                <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                    <Button Text="Owner surrendered pet"
+                            Command="{Binding ReleasePetOwnershipCommand}"
+                            CommandParameter="{Binding SelectedPet}"
+                            IsVisible="{Binding IsEditMode}"/>
+                    <Button 
+                        Text="Save"
+                        Command="{Binding SavePetCommand}"
+                        BackgroundColor="Green"
+                        TextColor="White"/>
+                    <Button 
+                        Text="Cancel"
+                        Command="{Binding CancelEditPetCommand}"
+                        BackgroundColor="Red"
+                        TextColor="White"/>
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+    </ScrollView>   
+</toolkit:Popup>

@@ -54,7 +54,7 @@ public class PetOwnerService
 
         foreach (var pet in petService.Pets)
         {
-            var owner = PetsOwners.FirstOrDefault(o => o.OwnerId == pet.Owner?.OwnerId || o.OwnerId == pet.Owner?.OwnerName); // OwnerName на случай, если OwnerId не используется
+            var owner = PetsOwners.FirstOrDefault(o => o.OwnerId == pet.Owner?.OwnerId || o.OwnerId == pet.Owner?.OwnerName); 
             pet.Owner = owner;
             pet.IsOwned = owner != null;
 

@@ -5,12 +5,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ContosoPets.Models;
 
-public partial class PetsOwnersModel : ObservableValidator
+public partial class PetOwnerModel : ObservableValidator
 {
     [ObservableProperty]
-    private ObservableCollection<PetsOwnersModel> _petsOwners;
+    private ObservableCollection<PetOwnerModel> _petsOwners;
 
-    public PetsOwnersModel()
+    public PetOwnerModel()
     {
         Pets = [];
     }
@@ -69,7 +69,7 @@ public partial class PetsOwnersModel : ObservableValidator
     private string _ownerZipCode;
 
     [ObservableProperty]
-    private ObservableCollection<PetsModel> _pets;
+    private ObservableCollection<PetModel> _pets;
 
     public async Task<bool> Validate()
     {

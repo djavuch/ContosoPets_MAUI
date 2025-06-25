@@ -13,7 +13,7 @@ namespace ContosoPets.ViewModels.PetsViewModels;
 public partial class PetsViewModel
 {
     [RelayCommand]
-    private async Task OpenDetails(PetsModel pet)
+    private async Task OpenDetails(PetModel pet)
     {
         if (pet == null) return;
 
@@ -29,21 +29,20 @@ public partial class PetsViewModel
     [RelayCommand]
     private async Task OpenAddPopup()
     {
-        SelectedPet = new PetsModel();
-        IsEditMode = false;
-        _currentPopup = new PetFormPopup(this);
+        SelectedPet = new PetModel();
+        _currentPopup = new PetAddFormPopup(this);
         await Shell.Current.ShowPopupAsync(_currentPopup);
     }
 
     [RelayCommand]
-    private async Task OpenEditPopup(PetsModel pet)
+    private async Task OpenEditPopup(PetModel pet)
     {
-        _originalPet = pet;
-        int petCount = 0;
+        if (pet == null) return;
 
-        SelectedPet = new PetsModel
+        _originalPet = pet;
+
+        SelectedPet = new PetModel
         {
-            PetId = pet.PetSpecie + (petCount + 1),
             PetName = pet.PetName,
             PetSpecie = pet.PetSpecie,
             PetAge = pet.PetAge,
@@ -52,9 +51,33 @@ public partial class PetsViewModel
             Owner = pet.Owner
         };
 
-        IsEditMode = true;
-
-        _currentPopup = new PetFormPopup(this);
+        _currentPopup = new PetEditFormPopup(this);
         await Shell.Current.ShowPopupAsync(_currentPopup);
+    }
+
+    [RelayCommand]
+    private async Task CancelAddPet()
+    {
+        SelectedPet = null;
+        await _currentPopup.CloseAsync();   
+    }
+
+    [RelayCommand]
+    private async Task CancelEditPet()
+    {
+        if (_originalPet != null)
+        {
+            SelectedPet.PetId = _originalPet.PetId;
+            SelectedPet.PetName = _originalPet.PetName;
+            SelectedPet.PetSpecie = _originalPet.PetSpecie;
+            SelectedPet.PetAge = _originalPet.PetAge;
+            SelectedPet.PetPhysicalDescription = _originalPet.PetPhysicalDescription;
+            SelectedPet.PetPersonalDescription = _originalPet.PetPersonalDescription;
+            SelectedPet.Owner = _originalPet.Owner;
+            SelectedPet.IsOwned = _originalPet.IsOwned;
+        }
+
+        if (_currentPopup != null)
+            await _currentPopup.CloseAsync();
     }
 }

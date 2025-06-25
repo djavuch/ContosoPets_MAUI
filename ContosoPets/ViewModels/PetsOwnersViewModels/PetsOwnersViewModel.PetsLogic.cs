@@ -16,7 +16,7 @@ namespace ContosoPets.ViewModels.PetsOwnersViewModels;
 public partial class PetsOwnersViewModel
 {
     // Temporary collection to hold pets that are being removed from an owner
-    private readonly ObservableCollection<PetsModel> _petsToRemove = [];
+    private readonly ObservableCollection<PetModel> _petsToRemove = [];
 
     private string? _petSearchText;
     public string? PetSearchText
@@ -30,11 +30,11 @@ public partial class PetsOwnersViewModel
     }
 
     [ObservableProperty]
-    private ObservableCollection<PetsModel> _filteredPets;
+    private ObservableCollection<PetModel> _filteredPets;
 
     // Collection of pets that are not owned and have no owner
-    private PetsModel? _selectedPet;
-    public PetsModel? SelectedPet
+    private PetModel? _selectedPet;
+    public PetModel? SelectedPet
     {
         get => _selectedPet;
         set
@@ -42,7 +42,12 @@ public partial class PetsOwnersViewModel
             if (SetProperty(ref _selectedPet, value) && value != null)
             {
                 if (SelectedPetOwner.Pets != null && !SelectedPetOwner.Pets.Contains(value))
+                {
+                    value.IsOwned = true;
+                    value.Owner = SelectedPetOwner;
                     SelectedPetOwner.Pets.Add(value);
+                    FilterPets(); 
+                }
             }
         }
     }
@@ -62,50 +67,20 @@ public partial class PetsOwnersViewModel
     }
 
     [RelayCommand]
-    private void AddPetToOwner()
+    private void AddPetToOwner(PetModel pet)
     {
-        if (SelectedPet != null && !SelectedPet.IsOwned && SelectedPet.Owner == null && 
-            !SelectedPetOwner.Pets.Any(p => p.PetId == SelectedPet.PetId))
+        if (pet != null && !SelectedPetOwner.Pets.Any(p => p.PetId == pet.PetId))
         {
-            // Debug.WriteLine($"Adding pet: {SelectedPet.PetName}, Id: {SelectedPet.PetId}");
-
-            foreach (var owner in PetsOwners.Where(o => o != SelectedPetOwner))
-            {
-                var petToRemove = owner.Pets.FirstOrDefault(p => p.PetId == SelectedPet.PetId);
-                if (petToRemove != null)
-                {
-                    // Debug.WriteLine($"Removing pet {SelectedPet.PetName} from owner {owner.OwnerName}");
-                    owner.Pets.Remove(petToRemove);
-                    petToRemove.Owner = null;
-                }
-            }
-
-            // Set the owner of the pet and add it to the owner's pets collection
-            SelectedPet.Owner = SelectedPetOwner;
-            SelectedPet.IsOwned = true;
-            SelectedPetOwner.Pets.Add(SelectedPet);
-
-            if (_petsToRemove.Any(p => p.PetId == SelectedPet.PetId))
-            {
-                var petToRemove = _petsToRemove.First(p => p.PetId == SelectedPet.PetId);
-                _petsToRemove.Remove(petToRemove);
-                // Debug.WriteLine($"Removed pet {SelectedPet.PetName} from _petsToRemove");
-            }
-
-            _petOwnerService.SyncPetsWithOwners(_petService);
+            SelectedPetOwner.Pets.Add(pet);
+            _petsToRemove.Remove(pet);
             OnPropertyChanged(nameof(SelectedPetOwner));
-            FilterPets(); 
-            SelectedPet = null; 
-        }
-        else
-        {
-            // Debug.WriteLine("SelectedPet is null or already in SelectedPetOwner.Pets");
-            SelectedPet = null; 
+            FilterPets();
+            Debug.WriteLine($"Added pet: {pet.PetName} to owner: {SelectedPetOwner.OwnerName}");
         }
     }
 
     [RelayCommand]
-    private void RemovePetFromOwner(PetsModel pet)
+    private void RemovePetFromOwner(PetModel pet)
     {
         // Debug.WriteLine($"RemovePetFromOwner called with pet: {pet?.PetName}");
         if (pet != null && SelectedPetOwner.Pets.Any(p => p.PetId == pet.PetId))
@@ -114,6 +89,9 @@ public partial class PetsOwnersViewModel
             {
                 _petsToRemove.Add(pet);
             }
+
+            pet.Owner = null;
+            pet.IsOwned = false;
 
             SelectedPetOwner.Pets.Remove(pet);  
             OnPropertyChanged(nameof(SelectedPetOwner));

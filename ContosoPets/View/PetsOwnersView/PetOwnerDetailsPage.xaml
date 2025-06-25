@@ -109,7 +109,7 @@
                            TextColor="#333333" />
                 <CollectionView ItemsSource="{Binding PetOwner.Pets}">
                     <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="model:PetsModel">
+                        <DataTemplate x:DataType="model:PetModel">
                             <Label Text="{Binding PetName}"
                                    FontSize="14"
                                    TextColor="#555555" />

@@ -4,6 +4,7 @@ using ContosoPets.Models;
 using ContosoPets.View.PetsOwnersView;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,20 +13,9 @@ namespace ContosoPets.ViewModels.PetsOwnersViewModels;
 
 public partial class PetsOwnersViewModel
 {
-    // Open popup for adding a new pet owner
-    [RelayCommand]
-    private async Task OpenAddPetOwnerPopup()
-    {
-        SelectedPetOwner = new PetsOwnersModel();
-        _originalPetOwner = null; // Reset original owner for new entry
-        FilterPets();
-        _currentPopup = new PetsOwnersFormPopup(this);
-        await Shell.Current.ShowPopupAsync(_currentPopup);
-    }
-
     // Open details page for a selected pet owner
     [RelayCommand]
-    private async Task OpenDetails(PetsOwnersModel petOwner)
+    private async Task OpenDetails(PetOwnerModel petOwner)
     {
         if (petOwner == null) return;
 
@@ -37,16 +27,32 @@ public partial class PetsOwnersViewModel
         await Shell.Current.GoToAsync(nameof(PetOwnerDetailsPage), parameters);
     }
 
+    // Open popup for adding a new pet owner
+    [RelayCommand]
+    private async Task OpenAddPetOwnerPopup()
+    {
+        SelectedPetOwner = new PetOwnerModel
+        {
+            Pets = new ObservableCollection<PetModel>()
+        };
+        _originalPetOwner = null; 
+        _originalPetList.Clear(); 
+        FilterPets();
+        _currentPopup = new PetOwnerAddFormPopup(this);
+        await Shell.Current.ShowPopupAsync(_currentPopup);
+    }
+
     // Open popup for editing an existing pet owner
     [RelayCommand]
-    private async Task OpenPetOwnerEditPopup(PetsOwnersModel petOwner)
+    private async Task OpenPetOwnerEditPopup(PetOwnerModel petOwner)
     {
+        if (petOwner == null) return;
+
         _originalPetOwner = petOwner;
         _originalPetList = [.. petOwner.Pets]; // Store original pets list for comparison
 
-        SelectedPetOwner = new PetsOwnersModel
+        SelectedPetOwner = new PetOwnerModel
         {
-            OwnerId = petOwner.OwnerId,
             OwnerName = petOwner.OwnerName,
             OwnerPhone = petOwner.OwnerPhone,
             OwnerEmail = petOwner.OwnerEmail,
@@ -57,12 +63,20 @@ public partial class PetsOwnersViewModel
             Pets = [.. _originalPetList]
         };
 
-        _currentPopup = new PetsOwnersFormPopup(this);
-
         // Show available pets in the popup
         FilterPets();
-
+        _currentPopup = new PetOwnerEditFormPopup(this);
         await Shell.Current.ShowPopupAsync(_currentPopup);
+    }
+
+
+    [RelayCommand]
+    private async Task CancelAddPetOwner()
+    {
+        SelectedPetOwner = null;
+        _petsToRemove.Clear();
+        if (_currentPopup != null)
+            await _currentPopup.CloseAsync(false);
     }
 
     [RelayCommand]
@@ -73,16 +87,19 @@ public partial class PetsOwnersViewModel
             _originalPetList.Clear();
             foreach (var pet in _originalPetList)
             {
-                _originalPetList.Add(pet);
+                pet.Owner = _originalPetOwner;
+                pet.IsOwned = true;
+                _originalPetList.Add(pet);            
             }
+            _petsToRemove.Clear();
         }
 
-        _petsToRemove.Clear();
         SelectedPetOwner = null;
         _originalPetOwner = null;
         _originalPetList.Clear();
 
         if (_currentPopup != null)
             await _currentPopup.CloseAsync(false);
+        FilterPets();
     }
 }

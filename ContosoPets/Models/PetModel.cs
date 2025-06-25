@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ContosoPets.Models;
 
-public partial class PetsModel : ObservableValidator
+public partial class PetModel : ObservableValidator
 {
     private int _displayIndexPet;
 
@@ -50,10 +50,10 @@ public partial class PetsModel : ObservableValidator
     [ObservableProperty]
     private bool _isOwned;
 
-    private PetsOwnersModel? _owner;
+    private PetOwnerModel? _owner;
 
     // Check if the pet is owned
-    public PetsOwnersModel? Owner
+    public PetOwnerModel? Owner
     {
         get => _owner;
         set
@@ -67,7 +67,7 @@ public partial class PetsModel : ObservableValidator
 
     public override bool Equals(object? obj)
     {
-        if (obj is PetsModel other)
+        if (obj is PetModel other)
         {
             return PetId == other.PetId;
         }

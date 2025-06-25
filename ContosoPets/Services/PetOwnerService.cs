@@ -1,4 +1,5 @@
 ﻿using ContosoPets.Models;
+using ContosoPets.Utilities;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
@@ -6,55 +7,111 @@ namespace ContosoPets.Services;
 
 public class PetOwnerService
 {
-    private readonly ObservableCollection<PetsOwnersModel> _petsOwners = [];
-
-    // Service to manage pet data
+    private readonly ObservableCollection<PetOwnerModel> _petsOwners = [];
     private readonly PetService _petService;
-
-    public ObservableCollection<PetsOwnersModel> PetsOwners { get; } =
-    [
-        new PetsOwnersModel()
-        {
-            OwnerId = "1",
-            OwnerName = "John Doe",
-            OwnerPhone = "123-456-7890",
-            OwnerEmail = "johndoe@mail.com",
-            OwnerAddress = "123 Main St",
-            OwnerCity = "Seattle",
-            OwnerState = "WA",
-            OwnerZipCode = "98101",
-            Pets = []
-        },
-        new PetsOwnersModel()
-        {
-            OwnerId = "2",
-            OwnerName = "Jane Smith",
-            OwnerPhone = "987-654-3210",
-            OwnerEmail = "j_smith@mail.com",
-            OwnerAddress = "456 Elm St",
-            OwnerCity = "Bellevue",
-            OwnerState = "WA",
-            OwnerZipCode = "98004",
-            Pets = []
-        }
-    ];
+    public ObservableCollection<PetOwnerModel> PetsOwners => _petsOwners;
 
     public PetOwnerService(PetService petService)
     {
         _petService = petService;
+        InitializeDemoData();
         SyncPetsWithOwners(petService);
+    }
+
+    private void InitializeDemoData()
+    {
+        var demoOwners = PetOwnerDemoDataInitializer.GetDemoPetsOwners().ToList();
+        foreach (var petOwner in demoOwners)
+        {
+            _petsOwners.Add(petOwner);
+        }
+    }
+
+    public void AddPetOwner(PetOwnerModel petOwner)
+    {
+       ArgumentNullException.ThrowIfNull(petOwner);
+
+       if (string.IsNullOrEmpty(petOwner.OwnerId))
+       {
+           petOwner.OwnerId = Guid.NewGuid().ToString(); 
+       }
+
+      petOwner.Pets ??= [];
+
+      foreach (var pet in petOwner.Pets)
+      {
+          pet.Owner = petOwner;
+          pet.IsOwned = true;
+          if (!_petService.Pets.Contains(pet))
+          {
+              _petService.AddPet(pet);
+          }
+      }
+
+      _petsOwners.Add(petOwner);
+      SyncPetsWithOwners(_petService);
+    }
+
+    public void UpdatePetOwner(PetOwnerModel owner, IEnumerable<PetModel> petsToRemove = null, PetOwnerModel originalOwner = null)
+    {
+        if (owner == null || string.IsNullOrEmpty(owner.OwnerId))
+            throw new ArgumentException("Invalid owner or OwnerId");
+
+        if (petsToRemove != null)
+        {
+            foreach (var pet in petsToRemove)
+            {
+                pet.Owner = null;
+                pet.IsOwned = false;
+            }
+        }    
+
+        originalOwner.Pets.Clear();
+        foreach (var pet in owner.Pets)
+        {
+            pet.Owner = originalOwner;
+            pet.IsOwned = true;
+            originalOwner.Pets.Add(pet);
+        }
+
+        originalOwner.OwnerName = owner.OwnerName;
+        originalOwner.OwnerPhone = owner.OwnerPhone.Trim();
+        originalOwner.OwnerEmail = owner.OwnerEmail.Trim();
+        originalOwner.OwnerAddress = owner.OwnerAddress.Trim();
+        originalOwner.OwnerCity = owner.OwnerCity.Trim();
+        originalOwner.OwnerState = owner.OwnerState.Trim();
+        originalOwner.OwnerZipCode = owner.OwnerZipCode.Trim();
+        
+        SyncPetsWithOwners(_petService);
+    }
+
+    public void DeletePetOwner(PetOwnerModel owner)
+    {
+        if (owner == null)
+            throw new ArgumentNullException(nameof(owner));
+        {
+            foreach (var pet in owner.Pets)
+            {
+                pet.Owner = null; 
+                pet.IsOwned = false;
+            }
+            _petsOwners.Remove(owner);
+            SyncPetsWithOwners(_petService);
+        }
     }
 
     public void SyncPetsWithOwners(PetService petService)
     {
-        foreach (var owner in PetsOwners)
+        var petsOwnersCopy = PetsOwners.ToList();
+
+        foreach (var owner in petsOwnersCopy)
         {
             owner.Pets.Clear();
         }
 
-        foreach (var pet in petService.Pets)
+        foreach (var pet in petService.Pets.ToList())
         {
-            var owner = PetsOwners.FirstOrDefault(o => o.OwnerId == pet.Owner?.OwnerId || o.OwnerId == pet.Owner?.OwnerName); 
+            var owner = petsOwnersCopy.FirstOrDefault(o => o.OwnerId == pet.Owner?.OwnerId); 
             pet.Owner = owner;
             pet.IsOwned = owner != null;
 
@@ -63,84 +120,5 @@ public class PetOwnerService
                 owner.Pets.Add(pet);
             }
         }
-    }
-
-    public async Task AddPetOwner(PetsOwnersModel petOwner)
-    {
-        if (petOwner == null || string.IsNullOrEmpty(petOwner.OwnerId))
-            throw new ArgumentException("Invalid owner or OwnerId");
-
-        bool isValid = await CheckDuplicateOwnerEmailOrPhone(petOwner);
-        if (!isValid)
-            return;
-
-        petOwner.Pets ??= new ObservableCollection<PetsModel>();
-        PetsOwners.Add(petOwner);
-        SyncPetsWithOwners(_petService);
-    }
-
-    public async Task UpdateOwner(PetsOwnersModel oldPetOwnerData, PetsOwnersModel newPetOwnerData)
-    {
-        var index = PetsOwners.IndexOf(oldPetOwnerData);
-        if (index != -1)
-        {
-            bool isValid = await CheckDuplicateOwnerEmailOrPhone(newPetOwnerData);
-            if (!isValid)
-                return;
-
-            oldPetOwnerData.OwnerName = newPetOwnerData.OwnerName;
-            oldPetOwnerData.OwnerPhone = newPetOwnerData.OwnerPhone.Trim();
-            oldPetOwnerData.OwnerEmail = newPetOwnerData.OwnerEmail.Trim();
-            oldPetOwnerData.OwnerAddress = newPetOwnerData.OwnerAddress.Trim();
-            oldPetOwnerData.OwnerCity = newPetOwnerData.OwnerCity.Trim();
-            oldPetOwnerData.OwnerState = newPetOwnerData.OwnerState.Trim();
-            oldPetOwnerData.OwnerZipCode = newPetOwnerData.OwnerZipCode.Trim();
-            oldPetOwnerData.Pets = newPetOwnerData.Pets;
-            SyncPetsWithOwners(_petService);
-        }
-    }
-
-    public void DeletePetOwner(PetsOwnersModel owner)
-    {
-        if (owner == null)
-        {
-            foreach (var pet in owner.Pets)
-            {
-                pet.Owner = null; 
-            }
-            PetsOwners.Remove(owner);
-            SyncPetsWithOwners(_petService);
-        }
-    }
-
-    public void UpdateOwnerIndexes()
-    {
-        for (int i = 0; i < PetsOwners.Count; i++)
-        {
-            PetsOwners[i].DisplayIndexOwner = i + 1;
-        }
-    }
-
-    public async Task<bool> CheckDuplicateOwnerEmailOrPhone(PetsOwnersModel ownerToCheck)
-    {
-        var duplicateEmail = PetsOwners.Any(o =>
-            o != ownerToCheck &&
-            string.Equals(o.OwnerEmail, ownerToCheck.OwnerEmail, StringComparison.OrdinalIgnoreCase));
-
-        var duplicatePhone = PetsOwners.Any(o =>
-            o != ownerToCheck &&
-            string.Equals(o.OwnerPhone, ownerToCheck.OwnerPhone, StringComparison.OrdinalIgnoreCase));
-
-        if (duplicateEmail)
-        {
-            await Shell.Current.DisplayAlert("Duplicate Email", "An owner with this email already exists.", "OK");
-        }
-
-        if (duplicatePhone)
-        {
-            await Shell.Current.DisplayAlert("Duplicate Phone", "An owner with this phone number already exists.", "OK");
-        }
-
-        return !duplicateEmail && !duplicatePhone;
     }
 }

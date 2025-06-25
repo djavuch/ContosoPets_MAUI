@@ -13,13 +13,15 @@ public partial class PetsViewModel : ObservableObject
     // Service to manage pet data
     private readonly PetService _petsService;
 
-    private readonly PetOwnerService _petOwnerService;
+    private PetOwnerService _petOwnerService;
+
+    private readonly ObservableCollection<PetModel> _allPets;
 
     // The original pet object before editing
-    private PetsModel _originalPet;
+    private PetModel? _originalPet;
 
     // The current popup instance
-    private Popup _currentPopup;
+    private Popup? _currentPopup;
 
     // List of species options for the picker
     public ObservableCollection<string> SpeciesOptions { get; } =
@@ -29,24 +31,30 @@ public partial class PetsViewModel : ObservableObject
 
     // The list of pets
     [ObservableProperty]
-    private ObservableCollection<PetsModel> _pets;
+    private ObservableCollection<PetModel> _pets;
 
     [ObservableProperty]
-    private ObservableCollection<PetsOwnersModel> _petsOwners;
+    private ObservableCollection<PetOwnerModel> _petsOwners;
 
     [ObservableProperty]
-    private PetsModel _selectedPet;
-
-    // Flag to indicate if the form is in edit mode
-    [ObservableProperty]
-    private bool _isEditMode;
+    private PetModel _selectedPet;
 
     public PetsViewModel(PetService petsService, PetOwnerService petOwnerService)
     {
         _petsService = petsService;
         _petOwnerService = petOwnerService;
-        Pets = _petsService.Pets;
-        SelectedPet = new PetsModel();
-        _petsService.UpdateIndexes();
+        _allPets = new ObservableCollection<PetModel>(_petsService.Pets);
+        Pets = new ObservableCollection<PetModel>(_allPets);
+        SelectedPet = new PetModel();
+        UpdatePetIndexes();
+        FilterPagePets();
+    }
+
+    private void UpdatePetIndexes()
+    {
+        for (int i = 0; i < Pets.Count; i++)
+        {
+            Pets[i].DisplayIndexPet = i + 1;
+        }
     }
 }

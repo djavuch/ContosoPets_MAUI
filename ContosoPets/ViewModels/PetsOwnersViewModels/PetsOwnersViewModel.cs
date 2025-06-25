@@ -18,34 +18,46 @@ public partial class PetsOwnersViewModel : ObservableObject
 
     private readonly PetService _petService;
 
+    private readonly ObservableCollection<PetOwnerModel> _allPetOwners;
+
     // The original pet owner object before editing
-    private PetsOwnersModel? _originalPetOwner;
+    private PetOwnerModel? _originalPetOwner;
 
     // The current popup instance
-    private Popup _currentPopup;
+    private Popup? _currentPopup;
 
     [ObservableProperty]
-    private ObservableCollection<PetsOwnersModel> _petsOwners;
+    private ObservableCollection<PetOwnerModel> _petsOwners;
 
     [ObservableProperty]
-    private ObservableCollection<PetsModel> _petsCollection;
+    private ObservableCollection<PetModel> _petsCollection;
 
     // Selected pet owner for editing
     [ObservableProperty]
-    private PetsOwnersModel _selectedPetOwner;
+    private PetOwnerModel _selectedPetOwner;
 
     // Original pet list for owner
-    private List<PetsModel> _originalPetList = [];
+    private List<PetModel> _originalPetList = [];
 
     public PetsOwnersViewModel(PetOwnerService petOwnerService, PetService petService, PetsViewModel petsViewModel)
     {
         _petOwnerService = petOwnerService;
         _petService = petService;
-        PetsOwners = _petOwnerService.PetsOwners;
-        SelectedPetOwner = new PetsOwnersModel();
+        _allPetOwners = new ObservableCollection<PetOwnerModel>(_petOwnerService.PetsOwners);
+        PetsOwners = new ObservableCollection<PetOwnerModel>(_allPetOwners);
+        SelectedPetOwner = new PetOwnerModel();
         PetsCollection = petsViewModel.Pets;
         FilteredPets = [.. PetsCollection];
         _petOwnerService.SyncPetsWithOwners(_petService);
-        _petOwnerService.UpdateOwnerIndexes();
+        UpdateOwnerIndexes();
+        FilterPetOwners();
+    }  
+    
+    private void UpdateOwnerIndexes()
+    {
+        for (int i = 0; i < PetsOwners.Count; i++)
+        {
+            PetsOwners[i].DisplayIndexOwner = i + 1;
+        }
     }
 }

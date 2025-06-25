@@ -71,8 +71,17 @@
 	  <Compile Update="View\PetsOwnersView\PetOwnerDetailsPage.xaml.cs">
 	    <DependentUpon>PetOwnerDetailsPage.xaml</DependentUpon>
 	  </Compile>
-	  <Compile Update="View\PetsView\PetFormPopup.xaml.cs">
-	    <DependentUpon>PetFormPopup.xaml</DependentUpon>
+	  <Compile Update="View\PetsOwnersView\PetOwnerEditFormPopup.xaml.cs">
+	    <DependentUpon>PetOwnerEditFormPopup.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="View\PetsOwnersView\PetOwnerAddFormPopup.xaml.cs">
+	    <DependentUpon>PetOwnerAddFormPopup.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="View\PetsView\PetEditFormPopup.xaml.cs">
+	    <DependentUpon>PetEditFormPopup.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="View\PetsView\PetAddFormPopup.xaml.cs">
+	    <DependentUpon>PetAddFormPopup.xaml</DependentUpon>
 	  </Compile>
 	</ItemGroup>
 
@@ -80,16 +89,22 @@
 	  <MauiXaml Update="View\PetsOwnersView\PetOwnerDetailsPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="View\PetsOwnersView\PetOwnerEditFormPopup.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="View\PetsView\PetDetailsPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="View\PetsView\PetFormPopup.xaml">
+	  <MauiXaml Update="View\PetsView\PetEditFormPopup.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="View\PetsView\PetAddFormPopup.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="View\DeleteConfirmationPopup.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="View\PetsOwnersView\PetsOwnersFormPopup.xaml">
+	  <MauiXaml Update="View\PetsOwnersView\PetOwnerAddFormPopup.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="View\PetsOwnersView\PetsOwnersPage.xaml">

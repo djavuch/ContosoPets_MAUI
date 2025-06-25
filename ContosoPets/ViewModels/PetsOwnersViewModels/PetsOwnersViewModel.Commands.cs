@@ -18,89 +18,63 @@ public partial class PetsOwnersViewModel
 {
     // Save currect pet owner
     [RelayCommand]
-    private async Task SavePetOwner()
+    private async Task AddPetOwner()
     {
-        //Check if pet is available. Commented out because I added filtering logic in the popup and unavailable pets are not shown in the list.
-        //foreach (var pet in SelectedPetOwner.Pets)
-        //{
-        //    var existingOwner = PetsOwners.FirstOrDefault(o => o != _originalPetOwner && o.Pets.Any(p => p.PetId == pet.PetId));
-        //    if (existingOwner != null)
-        //    {
-        //        await Shell.Current.DisplayAlert("Error", $"Pet '{pet.PetName}' is already owned by '{existingOwner.OwnerName}'. Please select a different pet.", "OK");
-        //        return;
-        //    }
-        //    pet.Owner = SelectedPetOwner; // Set the owner of the pet
-        //}
-
-        if (_originalPetOwner != null)
+        try
         {
-            bool isDuplicateCheckPassed = await _petOwnerService.CheckDuplicateOwnerEmailOrPhone(SelectedPetOwner);
-            if (!isDuplicateCheckPassed)
+            bool isValid = await SelectedPetOwner.Validate();
+            if (!isValid)
             {
-                return; 
+                var errors = string.Join("\n", SelectedPetOwner.GetErrors().Select(e => e.ErrorMessage));
+                await Shell.Current.DisplayAlert("Validation Error", errors, "OK");
+                return;
             }
-
-            foreach (var pet in _petsToRemove)
-            {
-                pet.Owner = null;  
-                pet.IsOwned = false; 
-            }
-
-            _originalPetOwner.Pets.Clear();
-
-            foreach (var pet in SelectedPetOwner.Pets)
-            {
-                pet.Owner = SelectedPetOwner;
-                pet.IsOwned = true;
-                _originalPetOwner.Pets.Add(pet);
-            }    
-                
-
-            _originalPetList = [.. _originalPetOwner.Pets];
-
-            _petsToRemove.Clear();
-        }
-        else
-        {
-            bool isDuplicateCheckPassed = await _petOwnerService.CheckDuplicateOwnerEmailOrPhone(SelectedPetOwner);
-            if (!isDuplicateCheckPassed)
-            {
-                return; 
-            }
-
-            // Generate unuqie ID for new pet owner with first chars of the name and random numbers
-            SelectedPetOwner.OwnerId = GenerateUniqueId.CreateUniqueId(SelectedPetOwner.OwnerName);
-            
-            // Add new pet owner
-            foreach (var pet in SelectedPetOwner.Pets)
-            {
-                pet.Owner = SelectedPetOwner;
-                pet.IsOwned = true;
-
-                if (pet.Owner?.OwnerId != SelectedPetOwner.OwnerId)
-                    pet.Owner.OwnerId = SelectedPetOwner.OwnerId;
-
-                if (!_petService.Pets.Contains(pet))
-                {           
-                    _petService.AddPet(pet);
-                }
-            }
-
             _petOwnerService.AddPetOwner(SelectedPetOwner);
-            _petOwnerService.UpdateOwnerIndexes();
-            _petsToRemove.Clear();
+            UpdateOwnerIndexes();
+            FilterPetOwners();
+            FilterPets();
+            await _currentPopup.CloseAsync();
         }
+        catch (InvalidOperationException ex)
+        {
+            await Shell.Current.DisplayAlert("Error", ex.Message, "OK");    
+        }
+        catch (ArgumentException ex)
+        {
+            await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
+        }
+    }
 
-        _petOwnerService.SyncPetsWithOwners(_petService);
-        await _currentPopup.CloseAsync();
-        FilterPets();
-
-        Debug.WriteLine($"Pets count to save: {SelectedPetOwner.Pets.Count}");
+    [RelayCommand]
+    private async Task EditPetOwner()
+    {
+        try
+        {
+            bool isValid = await SelectedPetOwner.Validate();
+            if (!isValid)
+            {
+                var errors = string.Join("\n", SelectedPetOwner.GetErrors().Select(e => e.ErrorMessage));
+                await Shell.Current.DisplayAlert("Validation Error", errors, "OK");
+                return;
+            }
+            _petOwnerService.UpdatePetOwner(SelectedPetOwner, _petsToRemove, _originalPetOwner);
+            FilterPetOwners();
+            FilterPets();
+            await _currentPopup.CloseAsync();
+        }
+        catch (InvalidOperationException ex)
+        {
+            await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
+        }
+        catch (ArgumentException ex)
+        {
+            await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
+        }
     }
 
     // Delete current pet owner
     [RelayCommand]
-    private async Task DeletePetOwner(PetsOwnersModel petOwner)
+    private async Task DeletePetOwner(PetOwnerModel petOwner)
     {
         if (petOwner == null) return;
 
@@ -110,17 +84,10 @@ public partial class PetsOwnersViewModel
         popup.BindingContext = viewModel;
         var confirmed = await Shell.Current.ShowPopupAsync(popup);
 
-        if (confirmed is bool)
+        if (confirmed is bool result && result)
         {
-            foreach (var pet in petOwner.Pets)
-            {
-                pet.Owner = null; 
-            }
-
             _petOwnerService.DeletePetOwner(petOwner);
-            PetsOwners.Remove(petOwner);
-            _petOwnerService.SyncPetsWithOwners(_petService);
-            _petOwnerService.UpdateOwnerIndexes();
+            FilterPetOwners();
             FilterPets();
         }
     }
@@ -146,8 +113,8 @@ public partial class PetsOwnersViewModel
                 _petOwnerService.DeletePetOwner(owner);
                 PetsOwners.Remove(owner);
             }
-            _petOwnerService.SyncPetsWithOwners(_petService);
-            _petOwnerService.UpdateOwnerIndexes();
+            FilterPetOwners();
+            FilterPets();
         }
     }
 }

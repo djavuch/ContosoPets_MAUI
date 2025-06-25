@@ -3,7 +3,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-    x:Class="ContosoPets.PetsOwnersFormPopup"
+    x:Class="ContosoPets.PetOwnerAddFormPopup"
     xmlns:model="clr-namespace:ContosoPets.Models"
     xmlns:vm="clr-namespace:ContosoPets.ViewModels.PetsOwnersViewModels"
     x:DataType="vm:PetsOwnersViewModel"
@@ -34,7 +34,7 @@
                     x:Name="PetsCollectionView"  
                     ItemsSource="{Binding SelectedPetOwner.Pets}">
                     <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="model:PetsModel">
+                        <DataTemplate x:DataType="model:PetModel">
                             <HorizontalStackLayout Spacing="8" VerticalOptions="Center" Padding="4,0">
                                 <Label Text="{Binding PetName}" VerticalOptions="Center" />
                                 <Button
@@ -61,7 +61,7 @@
                             MinimumHeightRequest="100"
                             SelectionChangedCommand="{Binding x:DataType='vm:PetsOwnersViewModel', Source={RelativeSource AncestorType={x:Type vm:PetsOwnersViewModel}}, Path=AddPetToOwnerCommand}">
                     <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="model:PetsModel">
+                        <DataTemplate x:DataType="model:PetModel">
                             <Border Stroke="#E0E0E0" StrokeThickness="1" Padding="8" Margin="0,2" StrokeShape="RoundRectangle 8">
                                 <Label Text="{Binding PetName}" />
                             </Border>
@@ -72,10 +72,10 @@
 
                 <Button
                     Text="Save"
-                    Command="{Binding SavePetOwnerCommand}"/>
+                    Command="{Binding AddPetOwnerCommand}"/>
                 <Button
                     Text="Cancel"
-                    Command="{Binding CancelPetOwnerEditCommand}"/>
+                    Command="{Binding CancelAddPetOwnerCommand}"/>
             </VerticalStackLayout>
         </Border>
     </ScrollView>

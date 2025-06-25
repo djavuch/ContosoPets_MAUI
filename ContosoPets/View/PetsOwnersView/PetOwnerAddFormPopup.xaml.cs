@@ -3,9 +3,9 @@ using ContosoPets.ViewModels.PetsOwnersViewModels;
 
 namespace ContosoPets;
 
-public partial class PetsOwnersFormPopup : Popup
+public partial class PetOwnerAddFormPopup : Popup
 {
-    public PetsOwnersFormPopup(PetsOwnersViewModel vm)
+    public PetOwnerAddFormPopup(PetsOwnersViewModel vm)
     {
         InitializeComponent();
         BindingContext = vm;

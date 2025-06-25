@@ -4,63 +4,70 @@
              xmlns:vm="clr-namespace:ContosoPets.ViewModels.PetsViewModels"
              xmlns:model="clr-namespace:ContosoPets.Models"
              x:Class="ContosoPets.View.PetsView.PetsPage">
+    <ScrollView>
+        <StackLayout Padding="20">
+            <Entry Placeholder="Search by pet name or owner"
+                   Text="{Binding PetPageSearchText}"
+                   ClearButtonVisibility="WhileEditing"
+                   FontSize="16"
+                   Margin="0,0,0,10" />
 
-    <StackLayout Padding="20">
-        <Grid ColumnDefinitions="40,*,*,*,*,*"
-                RowDefinitions="Auto"
-                BackgroundColor="#c7d9d5"
-                Padding="10">
-            <Label Grid.Column="0" Text="No." FontAttributes="Bold,Italic" />
-            <Label Grid.Column="1" Text="Name" FontAttributes="Bold,Italic" />
-            <Label Grid.Column="2" Text="Species" FontAttributes="Bold,Italic" />
-            <Label Grid.Column="3" Text="Age" FontAttributes="Bold,Italic" />
-            <Label Grid.Column="4" Text="Owner" FontAttributes="Bold,Italic" />
-            <Label Grid.Column="5" Text="Actions" FontAttributes="Bold,Italic" />
-        </Grid>
+            <Grid ColumnDefinitions="40,*,*,*,*,*"
+                    RowDefinitions="Auto"
+                    BackgroundColor="#c7d9d5"
+                    Padding="10">
+                <Label Grid.Column="0" Text="No." FontAttributes="Bold,Italic" />
+                <Label Grid.Column="1" Text="Name" FontAttributes="Bold,Italic" />
+                <Label Grid.Column="2" Text="Species" FontAttributes="Bold,Italic" />
+                <Label Grid.Column="3" Text="Age" FontAttributes="Bold,Italic" />
+                <Label Grid.Column="4" Text="Owner" FontAttributes="Bold,Italic" />
+                <Label Grid.Column="5" Text="Actions" FontAttributes="Bold,Italic" />
+            </Grid>
 
-        <CollectionView ItemsSource="{Binding Pets}">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Border Stroke="#c7d9d5" StrokeThickness="1" Margin="0,0,0,15">
-                        <Grid ColumnDefinitions="40,*,*,*,*,*"
-                              Padding="10">
-                            <Label Grid.Column="0" Text="{Binding DisplayIndexPet}" VerticalOptions="Center" />
+            <CollectionView ItemsSource="{Binding Pets}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Stroke="#c7d9d5" StrokeThickness="1" Margin="0,0,0,15">
+                            <Grid ColumnDefinitions="40,*,*,*,*,*"
+                                  Padding="10">
+                                <Label Grid.Column="0" Text="{Binding DisplayIndexPet}" VerticalOptions="Center" />
 
-                            <Label 
-                                Grid.Column="1" VerticalOptions="Center" >
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PetsViewModel}}, Path=OpenDetailsCommand}"
-                                                          CommandParameter="{Binding}"/>
-                                </Label.GestureRecognizers>
-                                <Label.FormattedText>
-                                    <FormattedString>
-                                        <Span Text="{Binding PetName}" 
-                                              TextColor="black"
-                                              FontAttributes="Bold" />
-                                    </FormattedString>
-                                </Label.FormattedText>
-                            </Label>    
+                                <Label 
+                                    Grid.Column="1" VerticalOptions="Center" >
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:PetsViewModel}}, Path=OpenDetailsCommand}"
+                                                              CommandParameter="{Binding}"/>
+                                    </Label.GestureRecognizers>
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{Binding PetName}" 
+                                                  TextColor="black"
+                                                  FontAttributes="Bold" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
 
-                            <Label Grid.Column="2" Text="{Binding PetSpecie}" VerticalOptions="Center" />
-                            <Label Grid.Column="3" Text="{Binding PetAge}" VerticalOptions="Center" />
-                            <Label Grid.Column="4" Text="{Binding Owner.OwnerName}" VerticalOptions="Center" />
+                                <Label Grid.Column="2" Text="{Binding PetSpecie}" VerticalOptions="Center" />
+                                <Label Grid.Column="3" Text="{Binding PetAge}" VerticalOptions="Center" />
+                                <Label Grid.Column="4" Text="{Binding Owner.OwnerName}" VerticalOptions="Center" />
 
-                            <CheckBox Grid.Column="5" IsChecked="{Binding SelectedPetToRemove}"/>
-                        </Grid>
-                    </Border>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+                                <CheckBox Grid.Column="5" IsChecked="{Binding SelectedPetToRemove}"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
 
-        <HorizontalStackLayout Spacing="10" HorizontalOptions="Center" Padding="0,10,0,0">
-            <Button 
-                Text="&#x2795; Add pet" 
-                Command="{Binding OpenAddPopupCommand}"/>
+            <HorizontalStackLayout Spacing="10" HorizontalOptions="Center" Padding="0,10,0,0">
+                <Button 
+                    Text="&#x2795; Add pet" 
+                    Command="{Binding OpenAddPopupCommand}"/>
 
-            <Button 
-                Text="&#x1f5d1; Delete selected pets" 
-                Command="{Binding DeleteSelectedPetsCommand}"/>
-        </HorizontalStackLayout>
+                <Button 
+                    Text="&#x1f5d1; Delete selected pets" 
+                    Command="{Binding DeleteSelectedPetsCommand}"/>
+            </HorizontalStackLayout>
 
-    </StackLayout>
+        </StackLayout>
+    </ScrollView>
 </ContentPage>

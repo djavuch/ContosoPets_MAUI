@@ -148,6 +148,13 @@
                         FontAttributes="Bold"
                         CornerRadius="10"
                         Grid.Column="1" />
+                <Button Text="Edit"
+                        Command="{Binding DeletePetCommand}"
+                        BackgroundColor="#4CAF50"
+                        TextColor="White"
+                        FontAttributes="Bold"
+                        CornerRadius="10"
+                        Grid.Column="1" />
             </Grid>
         </VerticalStackLayout>
     </ScrollView>

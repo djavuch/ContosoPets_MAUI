@@ -13,32 +13,58 @@ namespace ContosoPets.ViewModels.PetsViewModels;
 public partial class PetsViewModel
 {
     [RelayCommand]
-    private async Task SavePet()
+    private async Task AddPet()
     {
-        bool isValid = await SelectedPet.Validate();
-        if (!isValid)
+        try
         {
-            await Shell.Current.DisplayAlert("Validation Error", string.Join("\n", SelectedPet.GetErrors().Select(e => e.ErrorMessage)), "OK");
-            return;
-        }
+            bool isValid = await SelectedPet.Validate();
+            if (!isValid)
+            {
+                await Shell.Current.DisplayAlert("Validation Error", string.Join("\n", SelectedPet.GetErrors().Select(e => e.ErrorMessage)), "OK");
+                return;
+            }
 
-        if (_originalPet != null)
-        {
-            _petsService.UpdatePet(_originalPet, SelectedPet);
-        }
-        else
-        {
             _petsService.AddPet(SelectedPet);
-            _petsService.UpdateIndexes();
-            Debug.WriteLine($"Added New Pet: ID={SelectedPet.PetId}, Name={SelectedPet.PetName}, Specie={SelectedPet.PetSpecie}, Age={SelectedPet.PetAge}, PhysicalDesc={SelectedPet.PetPhysicalDescription}, PersonalDesc={SelectedPet.PetPersonalDescription}, Owner={(SelectedPet.Owner != null ? SelectedPet.Owner.ToString() : "None")}");
+            FilterPagePets();
+            await _currentPopup.CloseAsync();
         }
-
-        _petOwnerService.SyncPetsWithOwners(_petsService);
-        await _currentPopup.CloseAsync();
+        catch (InvalidOperationException ex)
+        {
+            await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
+        }
+        catch (ArgumentException ex)
+        {
+            await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
+        }
     }
 
     [RelayCommand]
-    private async Task DeletePet(PetsModel pet)
+    private async Task EditPet()
+    {
+        try
+        {
+            bool isValid = await SelectedPet.Validate();
+            if (!isValid)
+            {
+                await Shell.Current.DisplayAlert("Validation Error", string.Join("\n", SelectedPet.GetErrors().Select(e => e.ErrorMessage)), "OK");
+                return;
+            }
+            _petsService.UpdatePet(SelectedPet, _originalPet);
+            FilterPagePets();
+            await _currentPopup.CloseAsync();
+        }
+        catch (InvalidOperationException ex)
+        {
+            await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
+        }
+        catch (ArgumentException ex)
+        {
+            await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
+        }
+    }
+
+    [RelayCommand]
+    private async Task DeletePet(PetModel pet)
     {
         if (pet == null) return;
 
@@ -54,7 +80,7 @@ public partial class PetsViewModel
             _petsService.DeletePet(pet);
             Pets.Remove(pet);
             _petOwnerService.SyncPetsWithOwners(_petsService);
-            _petsService.UpdateIndexes();
+            FilterPagePets();
         }
     }
 
@@ -66,25 +92,6 @@ public partial class PetsViewModel
 
         SelectedPet.Owner = null;
         SelectedPet.IsOwned = false;
-    }
-
-    [RelayCommand]
-    private async Task CancelEditPet()
-    {
-        if (_originalPet != null)
-        {
-            SelectedPet.PetId = _originalPet.PetId;
-            SelectedPet.PetName = _originalPet.PetName;
-            SelectedPet.PetSpecie = _originalPet.PetSpecie;
-            SelectedPet.PetAge = _originalPet.PetAge;
-            SelectedPet.PetPhysicalDescription = _originalPet.PetPhysicalDescription;
-            SelectedPet.PetPersonalDescription = _originalPet.PetPersonalDescription;
-            SelectedPet.Owner = _originalPet.Owner;
-            SelectedPet.IsOwned = _originalPet.IsOwned;
-        }
-
-        if (_currentPopup != null)
-            await _currentPopup.CloseAsync();
     }
 
     [RelayCommand]
@@ -104,12 +111,12 @@ public partial class PetsViewModel
 
         if (confirmed is bool result && result)
         {
+            _petsService.DeleteSelectedPets(selectedPetsToRemove);
             foreach (var pet in selectedPetsToRemove)
             {
-                _petsService.DeletePet(pet);
                 Pets.Remove(pet);
             }
-            _petsService.UpdateIndexes();
+            FilterPagePets();
         }
     }
 }

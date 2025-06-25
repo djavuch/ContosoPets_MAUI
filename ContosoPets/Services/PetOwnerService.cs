@@ -29,27 +29,27 @@ public class PetOwnerService
 
     public void AddPetOwner(PetOwnerModel petOwner)
     {
-        ArgumentNullException.ThrowIfNull(petOwner);
+       ArgumentNullException.ThrowIfNull(petOwner);
 
-        if (string.IsNullOrEmpty(petOwner.OwnerId))
-        {
-            petOwner.OwnerId = Guid.NewGuid().ToString(); 
-        }
+       if (string.IsNullOrEmpty(petOwner.OwnerId))
+       {
+           petOwner.OwnerId = Guid.NewGuid().ToString(); 
+       }
 
-        petOwner.Pets ??= [];
+      petOwner.Pets ??= [];
 
-        foreach (var pet in petOwner.Pets)
-        {
-            pet.Owner = petOwner;
-            pet.IsOwned = true;
-            if (!_petService.Pets.Contains(pet))
-            {
-                _petService.AddPet(pet);
-            }
-        }
+      foreach (var pet in petOwner.Pets)
+      {
+          pet.Owner = petOwner;
+          pet.IsOwned = true;
+          if (!_petService.Pets.Contains(pet))
+          {
+              _petService.AddPet(pet);
+          }
+      }
 
-        _petsOwners.Add(petOwner);
-        SyncPetsWithOwners(_petService);
+      _petsOwners.Add(petOwner);
+      SyncPetsWithOwners(_petService);
     }
 
     public void UpdatePetOwner(PetOwnerModel owner, IEnumerable<PetModel> petsToRemove = null, PetOwnerModel originalOwner = null)
